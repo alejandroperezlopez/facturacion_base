@@ -79,6 +79,7 @@ class tpv_caja extends fbase_controller
         $terminal->anchopapel = intval($_POST['anchopapel']);
         $terminal->comandoapertura = $_POST['comandoapertura'];
         $terminal->comandocorte = $_POST['comandocorte'];
+        $terminal->comandologo = $_POST['comandologo'];
         $terminal->num_tickets = intval($_POST['num_tickets']);
         $terminal->sin_comandos = isset($_POST['sin_comandos']);
 
@@ -104,6 +105,7 @@ class tpv_caja extends fbase_controller
             $t2->anchopapel = intval($_POST['anchopapel']);
             $t2->comandoapertura = $_POST['comandoapertura'];
             $t2->comandocorte = $_POST['comandocorte'];
+            $t2->comandologo = $_POST['comandologo'];
             $t2->num_tickets = intval($_POST['num_tickets']);
             $t2->sin_comandos = isset($_POST['sin_comandos']);
 

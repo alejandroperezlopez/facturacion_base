@@ -76,6 +76,12 @@ class terminal_caja extends \fs_model
     public $comandoapertura;
 
     /**
+     * Comando ESC/POST para imprimir el logo configurado en la impresora
+     * @var string 
+     */
+    public $comandologo;
+
+    /**
      * Número de impresiones para cada ticket.
      * @var integer 
      */
@@ -112,6 +118,11 @@ class terminal_caja extends \fs_model
                 $this->comandoapertura = $data['comandoapertura'];
             }
 
+            $this->comandologo = '';
+            if (isset($data['comandologo'])) {
+                $this->comandologo = $data['comandologo'];
+            }
+
             $this->num_tickets = 1;
             if (isset($data['num_tickets'])) {
                 $this->num_tickets = intval($data['num_tickets']);
@@ -127,6 +138,7 @@ class terminal_caja extends \fs_model
             $this->anchopapel = 40;
             $this->comandocorte = '27.105';
             $this->comandoapertura = '27.112.48';
+            $this->comandologo = '';
             $this->num_tickets = 1;
             $this->sin_comandos = FALSE;
         }
@@ -274,6 +286,7 @@ class terminal_caja extends \fs_model
                 ", anchopapel = " . $this->var2str($this->anchopapel) .
                 ", comandocorte = " . $this->var2str($this->comandocorte) .
                 ", comandoapertura = " . $this->var2str($this->comandoapertura) .
+                ", comandologo =" . $this->var2str($this->comandologo) . 
                 ", num_tickets = " . $this->var2str($this->num_tickets) .
                 ", sin_comandos = " . $this->var2str($this->sin_comandos) .
                 "  WHERE id = " . $this->var2str($this->id) . ";";
@@ -282,7 +295,7 @@ class terminal_caja extends \fs_model
         }
 
         $sql = "INSERT INTO cajas_terminales (codalmacen,codserie,codcliente,tickets,anchopapel,"
-            . "comandocorte,comandoapertura,num_tickets,sin_comandos) VALUES (" .
+            . "comandocorte,comandoapertura,comandologo,num_tickets,sin_comandos) VALUES (" .
             $this->var2str($this->codalmacen) . "," .
             $this->var2str($this->codserie) . "," .
             $this->var2str($this->codcliente) . "," .
@@ -290,6 +303,7 @@ class terminal_caja extends \fs_model
             $this->var2str($this->anchopapel) . "," .
             $this->var2str($this->comandocorte) . "," .
             $this->var2str($this->comandoapertura) . "," .
+            $this->var2str($this->comandologo) . "," .
             $this->var2str($this->num_tickets) . "," .
             $this->var2str($this->sin_comandos) . ");";
 
@@ -333,6 +347,36 @@ class terminal_caja extends \fs_model
         return $this->all_from($sql);
     }
 
+    public function imprimir_logo()
+    {
+        if ($this->sin_comandos) 
+        {
+            /// nada
+        } else if ($this->comandologo)
+        {
+            $aux = explode('.', $this->comandologo);
+            $output = '';
+            if($aux)
+            {
+                foreach($aux as $a)
+                    $output .= chr($a);
+            }
+            $output .= '';
+            $this->add_linea($output);
+        }
+    }
+
+    /*public function imprimir_logo()
+    {
+        $aux = explode('.',"29.40.76.6.0.48.69.48.48.1.1");
+        if($aux)
+        {
+            foreach($aux as $a)
+                $this->tickets .= chr($a);
+        }
+        $this->tickets .= '';
+    }*/
+
     /**
      * A partir de una factura añade un ticket a la cola de impresión de este terminal.
      * @param \factura_cliente $factura
@@ -343,13 +387,16 @@ class terminal_caja extends \fs_model
     public function imprimir_ticket(&$factura, &$empresa, $imprimir_descripciones = TRUE, $imprimir_observaciones = FALSE)
     {
         $medio = $this->anchopapel / 2.5;
-        $this->add_linea_big($this->center_text($this->sanitize($empresa->nombre), $medio) . "\n");
+        $this->imprimir_logo();
+        $this->add_linea("\n");
+        $this->add_linea($this->center_text($this->sanitize($empresa->nombre)) . "\n");
+        //$this->add_linea_big($this->center_text($this->sanitize($empresa->nombre), $medio) . "\n");
 
         if ($empresa->lema != '') {
             $this->add_linea($this->center_text($this->sanitize($empresa->lema)) . "\n\n");
-        } else {
+        } /*else {
             $this->add_linea("\n");
-        }
+        }*/
 
         $this->add_linea(
             $this->center_text($this->sanitize($empresa->direccion) . " - " . $this->sanitize($empresa->ciudad)) . "\n"
@@ -434,12 +481,15 @@ class terminal_caja extends \fs_model
     public function imprimir_ticket_regalo(&$factura, &$empresa, $imprimir_descripciones = TRUE, $imprimir_observaciones = FALSE)
     {
         $medio = $this->anchopapel / 2.5;
-        $this->add_linea_big($this->center_text($this->sanitize($empresa->nombre), $medio) . "\n");
+        $this->imprimir_logo();
+        $this->add_linea("\n");
+        $this->add_linea($this->center_text($this->sanitize($empresa->nombre)) . "\n");
+        //$this->add_linea_big($this->center_text($this->sanitize($empresa->nombre), $medio) . "\n");
 
         if ($empresa->lema != '') {
             $this->add_linea($this->center_text($this->sanitize($empresa->lema)) . "\n\n");
-        } else
-            $this->add_linea("\n");
+        } /*else
+            $this->add_linea("\n");*/
 
         $this->add_linea(
             $this->center_text($this->sanitize($empresa->direccion) . " - " . $this->sanitize($empresa->ciudad)) . "\n"

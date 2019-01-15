@@ -45,6 +45,10 @@
         <tipo>character varying(50)</tipo>
     </columna>
     <columna>
+        <nombre>comandologo</nombre>
+        <tipo>character varying(50)</tipo>
+    </columna>
+    <columna>
         <nombre>num_tickets</nombre>
         <tipo>integer</tipo>
     </columna>
