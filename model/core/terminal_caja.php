@@ -384,7 +384,7 @@ class terminal_caja extends \fs_model
      * @param type $imprimir_descripciones
      * @param type $imprimir_observaciones
      */
-    public function imprimir_ticket(&$factura, &$empresa, $imprimir_descripciones = TRUE, $imprimir_observaciones = FALSE)
+    public function imprimir_ticket(&$factura, &$empresa, $imprimir_descripciones = TRUE, $imprimir_observaciones = FALSE, $nombre_empleado)
     {
         $medio = $this->anchopapel / 2.5;
         $this->imprimir_logo();
@@ -412,7 +412,7 @@ class terminal_caja extends \fs_model
         $linea .= $factura->fecha . " " . Date('H:i', strtotime($factura->hora)) . "\n";
         $this->add_linea($linea);
         $this->add_linea("Cliente: " . $this->sanitize($factura->nombrecliente) . "\n");
-        $this->add_linea("Empleado: " . $factura->codagente . "\n\n");
+        $this->add_linea("Le atendió: " . $nombre_empleado . "\n\n");
 
         if ($imprimir_observaciones) {
             $this->add_linea('Observaciones: ' . $this->sanitize($factura->observaciones) . "\n\n");
@@ -478,7 +478,7 @@ class terminal_caja extends \fs_model
      * @param \factura_cliente $factura
      * @param \empresa $empresa
      */
-    public function imprimir_ticket_regalo(&$factura, &$empresa, $imprimir_descripciones = TRUE, $imprimir_observaciones = FALSE)
+    public function imprimir_ticket_regalo(&$factura, &$empresa, $imprimir_descripciones = TRUE, $imprimir_observaciones = FALSE, $nombre_empleado)
     {
         $medio = $this->anchopapel / 2.5;
         $this->imprimir_logo();
@@ -505,7 +505,7 @@ class terminal_caja extends \fs_model
         $linea .= $factura->fecha . " " . Date('H:i', strtotime($factura->hora)) . "\n";
         $this->add_linea($linea);
         $this->add_linea("Cliente: " . $this->sanitize($factura->nombrecliente) . "\n");
-        $this->add_linea("Empleado: " . $factura->codagente . "\n\n");
+        $this->add_linea("Le atendió: " . $nombre_empleado . "\n\n");
 
         if ($imprimir_observaciones) {
             $this->add_linea('Observaciones: ' . $this->sanitize($factura->observaciones) . "\n\n");

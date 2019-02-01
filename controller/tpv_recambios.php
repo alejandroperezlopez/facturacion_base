@@ -619,8 +619,10 @@ class tpv_recambios extends fbase_controller
                 $this->terminal->abrir_cajon();
             }
 
+            $nombre_empleado = $this->$agente->get_fullname();
+
             while ($num_tickets > 0) {
-                $this->terminal->imprimir_ticket($factura, $this->empresa, $this->imprimir_descripciones, $this->imprimir_observaciones);
+                $this->terminal->imprimir_ticket($factura, $this->empresa, $this->imprimir_descripciones, $this->imprimir_observaciones, $nombre_empleado);
                 $num_tickets--;
             }
 
@@ -645,7 +647,7 @@ class tpv_recambios extends fbase_controller
             }
 
             while ($num_tickets > 0) {
-                $this->terminal->imprimir_ticket_regalo($factura, $this->empresa, $this->imprimir_descripciones, $this->imprimir_observaciones);
+                $this->terminal->imprimir_ticket_regalo($factura, $this->empresa, $this->imprimir_descripciones, $this->imprimir_observaciones, $nombre_empleado);
                 $num_tickets--;
             }
 
