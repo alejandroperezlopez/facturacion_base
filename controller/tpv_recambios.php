@@ -308,7 +308,8 @@ class tpv_recambios extends fbase_controller
 
                 $this->results[$com->codigo] = array(
                     'ref' => $_POST['referencia4combi'],
-                    'desc' => base64_decode($_POST['desc']) . "\n" . $com->nombreatributo . ' - ' . $com->valor,
+                    /// antes en lugar de : se usaba un \n
+                    'desc' => base64_decode($_POST['desc']) . " : " . $com->nombreatributo . ' - ' . $com->valor,
                     'pvp' => floatval($_POST['pvp']) + $com->impactoprecio,
                     'dto' => floatval($_POST['dto']),
                     'codimpuesto' => $_POST['codimpuesto'],
