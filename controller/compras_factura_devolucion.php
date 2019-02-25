@@ -1,7 +1,7 @@
 <?php
-/*
+/**
  * This file is part of facturacion_base
- * Copyright (C) 2017  Carlos Garcia Gomez  neorazorx@gmail.com
+ * Copyright (C) 2017-2019 Carlos Garcia Gomez <neorazorx@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -10,13 +10,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
  * 
  * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
 require_once 'plugins/facturacion_base/extras/fbase_controller.php';
 
 /**
@@ -27,7 +26,16 @@ require_once 'plugins/facturacion_base/extras/fbase_controller.php';
 class compras_factura_devolucion extends fbase_controller
 {
 
+    /**
+     *
+     * @var factura_proveedor|bool
+     */
     public $factura;
+
+    /**
+     *
+     * @var serie
+     */
     public $serie;
 
     public function __construct()
@@ -82,12 +90,12 @@ class compras_factura_devolucion extends fbase_controller
             $frec->observaciones = $_POST['motivo'];
             $frec->numdocs = NULL;
 
-            $frec->irpf = 0;
-            $frec->neto = 0;
-            $frec->total = 0;
-            $frec->totalirpf = 0;
-            $frec->totaliva = 0;
-            $frec->totalrecargo = 0;
+            $frec->irpf = 0.0;
+            $frec->neto = 0.0;
+            $frec->total = 0.0;
+            $frec->totalirpf = 0.0;
+            $frec->totaliva = 0.0;
+            $frec->totalrecargo = 0.0;
 
             $guardar = FALSE;
             foreach ($this->factura->get_lineas() as $value) {
@@ -119,7 +127,7 @@ class compras_factura_devolucion extends fbase_controller
                             if ($linea->save()) {
                                 $articulo = $art0->get($linea->referencia);
                                 if ($articulo) {
-                                    $articulo->sum_stock($frec->codalmacen, 0 - $linea->cantidad, TRUE, $linea->codcombinacion);
+                                    $articulo->sum_stock($frec->codalmacen, $linea->cantidad, TRUE, $linea->codcombinacion);
                                 }
 
                                 if ($linea->irpf > $frec->irpf) {
@@ -166,18 +174,11 @@ class compras_factura_devolucion extends fbase_controller
         if ($this->empresa->contintegrada) {
             $asiento_factura = new asiento_factura();
             $asiento_factura->generar_asiento_compra($factura);
-
-            foreach ($asiento_factura->errors as $err) {
-                $this->new_error_msg($err);
-            }
-
-            foreach ($asiento_factura->messages as $msg) {
-                $this->new_message($msg);
-            }
-        } else {
-            /// generamos las líneas de IVA de todas formas
-            $factura->get_lineas_iva();
+            return;
         }
+
+        /// generamos las líneas de IVA de todas formas
+        $factura->get_lineas_iva();
     }
 
     private function share_extension()
