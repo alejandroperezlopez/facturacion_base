@@ -384,19 +384,16 @@ class terminal_caja extends \fs_model
      * @param type $imprimir_descripciones
      * @param type $imprimir_observaciones
      */
-    public function imprimir_ticket(&$factura, &$empresa, $imprimir_descripciones = TRUE, $imprimir_observaciones = FALSE)
+    public function imprimir_ticket(&$factura, &$empresa, $imprimir_descripciones = TRUE, $imprimir_observaciones = FALSE, $is_regalo = FALSE, $tpv_efectivo, $tpv_cambio)
     {
         $medio = $this->anchopapel / 2.5;
         $this->imprimir_logo();
         $this->add_linea("\n");
         $this->add_linea($this->center_text($this->sanitize($empresa->nombre)) . "\n");
-        //$this->add_linea_big($this->center_text($this->sanitize($empresa->nombre), $medio) . "\n");
 
         if ($empresa->lema != '') {
             $this->add_linea($this->center_text($this->sanitize($empresa->lema)) . "\n\n");
-        } /*else {
-            $this->add_linea("\n");
-        }*/
+        }
 
         $this->add_linea(
             $this->center_text($this->sanitize($empresa->direccion) . " - " . $this->sanitize($empresa->ciudad)) . "\n"
@@ -445,102 +442,45 @@ class terminal_caja extends \fs_model
         for ($i = 0; $i < $this->anchopapel; $i++) {
             $lineaiguales .= '=';
         }
-        $this->add_linea($lineaiguales . "\n");
-        $this->add_linea(
-            'TOTAL A PAGAR: ' . sprintf("%" . ($this->anchopapel - 15) . "s", $this->show_precio($factura->total, $factura->coddivisa)) . "\n"
-        );
-        $this->add_linea($lineaiguales . "\n");
 
-        /// imprimimos los impuestos desglosados
-        $this->add_linea(
-            'TIPO   BASE    ' . FS_IVA . '    RE' .
-            sprintf('%' . ($this->anchopapel - 24) . 's', 'TOTAL') .
-            "\n"
-        );
-        foreach ($factura->get_lineas_iva() as $imp) {
+        if ($is_regalo) {
+            $this->add_linea($lineaiguales);
+            $this->add_linea($this->center_text('TICKET REGALO'));
+        } else {
+            $this->add_linea($lineaiguales . "\n");
             $this->add_linea(
-                sprintf("%-6s", $imp->iva . '%') . ' ' .
-                sprintf("%-7s", $this->show_numero($imp->neto)) . ' ' .
-                sprintf("%-6s", $this->show_numero($imp->totaliva)) . ' ' .
-                sprintf("%-6s", $this->show_numero($imp->totalrecargo)) . ' ' .
-                sprintf('%' . ($this->anchopapel - 29) . 's', $this->show_numero($imp->totallinea)) .
+                'TOTAL A PAGAR: ' . sprintf("%" . ($this->anchopapel - 15) . "s", $this->show_precio($factura->total, $factura->coddivisa)) . "\n"
+            );
+            if ($tpv_efectivo) {
+                $this->add_linea(
+                    'EFECTIVO: ' . sprintf("%" . ($this->anchopapel - 10) . "s", $this->show_precio($tpv_efectivo, $factura->coddivisa)) . "\n"
+                );
+            }
+            if ($tpv_cambio) {
+                $this->add_linea(
+                    'CAMBIO: ' . sprintf("%" . ($this->anchopapel - 8) . "s", $this->show_precio($tpv_cambio, $factura->coddivisa)) . "\n"
+                );
+            }
+            $this->add_linea($lineaiguales . "\n");
+
+            /// imprimimos los impuestos desglosados
+            $this->add_linea(
+                'TIPO   BASE    ' . FS_IVA . '    RE' .
+                sprintf('%' . ($this->anchopapel - 24) . 's', 'TOTAL') .
                 "\n"
             );
-        }
-
-        $lineaiguales .= "\n\n\n\n\n\n\n\n";
-        $this->add_linea($lineaiguales);
-        $this->cortar_papel();
-    }
-
-    /**
-     * A partir de una factura añade un ticket regalo a la cola de impresión de este terminal.
-     * @param \factura_cliente $factura
-     * @param \empresa $empresa
-     */
-    public function imprimir_ticket_regalo(&$factura, &$empresa, $imprimir_descripciones = TRUE, $imprimir_observaciones = FALSE)
-    {
-        $medio = $this->anchopapel / 2.5;
-        $this->imprimir_logo();
-        $this->add_linea("\n");
-        $this->add_linea($this->center_text($this->sanitize($empresa->nombre)) . "\n");
-        //$this->add_linea_big($this->center_text($this->sanitize($empresa->nombre), $medio) . "\n");
-
-        if ($empresa->lema != '') {
-            $this->add_linea($this->center_text($this->sanitize($empresa->lema)) . "\n\n");
-        } /*else
-            $this->add_linea("\n");*/
-
-        $this->add_linea(
-            $this->center_text($this->sanitize($empresa->direccion) . " - " . $this->sanitize($empresa->ciudad)) . "\n"
-        );
-        $this->add_linea($this->center_text(FS_CIFNIF . ": " . $empresa->cifnif));
-        $this->add_linea("\n\n");
-
-        if ($empresa->horario != '') {
-            $this->add_linea($this->center_text($this->sanitize($empresa->horario)) . "\n\n");
-        }
-
-        $linea = "\n" . ucfirst(FS_FACTURA_SIMPLIFICADA) . ": " . $factura->codigo . "\n";
-        $linea .= $factura->fecha . " " . Date('H:i', strtotime($factura->hora)) . "\n";
-        $this->add_linea($linea);
-        $this->add_linea("Cliente: " . $this->sanitize($factura->nombrecliente) . "\n");
-        $this->add_linea("Empleado: " . $factura->codagente . "\n\n");
-
-        if ($imprimir_observaciones) {
-            $this->add_linea('Observaciones: ' . $this->sanitize($factura->observaciones) . "\n\n");
-        }
-
-        $width = $this->anchopapel - 15;
-        $this->add_linea(
-            sprintf("%3s", "Ud.") . " " .
-            sprintf("%-" . $width . "s", "Articulo") . " " .
-            sprintf("%10s", "TOTAL") . "\n"
-        );
-        $this->add_linea(
-            sprintf("%3s", "---") . " " .
-            sprintf("%-" . $width . "s", substr("--------------------------------------------------------", 0, $width - 1)) . " " .
-            sprintf("%10s", "----------") . "\n"
-        );
-        foreach ($factura->get_lineas() as $col) {
-            if ($imprimir_descripciones) {
-                $linea = sprintf("%3s", $col->cantidad) . " " . sprintf("%-" . $width . "s", substr($this->sanitize($col->descripcion), 0, $width - 1)) . " " .
-                    sprintf("%10s", '-') . "\n";
-            } else {
-                $linea = sprintf("%3s", $col->cantidad) . " " . sprintf("%-" . $width . "s", $this->sanitize($col->referencia))
-                    . " " . sprintf("%10s", '-') . "\n";
+            foreach ($factura->get_lineas_iva() as $imp) {
+                $this->add_linea(
+                    sprintf("%-6s", $imp->iva . '%') . ' ' .
+                    sprintf("%-7s", $this->show_numero($imp->neto)) . ' ' .
+                    sprintf("%-6s", $this->show_numero($imp->totaliva)) . ' ' .
+                    sprintf("%-6s", $this->show_numero($imp->totalrecargo)) . ' ' .
+                    sprintf('%' . ($this->anchopapel - 29) . 's', $this->show_numero($imp->totallinea)) .
+                    "\n"
+                );
             }
-
-            $this->add_linea($linea);
         }
 
-
-        $lineaiguales = '';
-        for ($i = 0; $i < $this->anchopapel; $i++) {
-            $lineaiguales .= '=';
-        }
-        $this->add_linea($lineaiguales);
-        $this->add_linea($this->center_text('TICKET REGALO'));
         $lineaiguales .= "\n\n\n\n\n\n\n\n";
         $this->add_linea($lineaiguales);
         $this->cortar_papel();

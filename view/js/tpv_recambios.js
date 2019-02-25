@@ -176,7 +176,7 @@ function recalcular()
     $("#tpv_total3").val(fs_round(total, fs_nf0));
 
     var tpv_efectivo = parseFloat($("#tpv_efectivo").val());
-    $("#tpv_cambio").val(show_precio(tpv_efectivo - total));
+    $("#tpv_cambio").val(number_format(parseFloat(tpv_efectivo) - total, 2, '.', ''));
 }
 
 function ajustar_total(i)

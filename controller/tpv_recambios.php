@@ -609,12 +609,12 @@ class tpv_recambios extends fbase_controller
                         fs_documento_post_save($factura);
 
                         $this->new_message("<a href='" . $factura->url() . "'>Factura</a> guardada correctamente.");
-                        if ($_POST['regalo'] == 'TRUE') {
-                            $this->imprimir_ticket_regalo($factura);
-                        } else {
-                            $this->imprimir_ticket($factura, floatval($_POST['num_tickets']));
-                        }
-
+                        $is_regalo = $_POST['regalo'] == 'TRUE';
+                        $tpv_cambio = isset($_POST['tpv_cambio']) ? $_POST['tpv_cambio']: '0.0';
+                        $tpv_efectivo = isset($_POST['tpv_efectivo']) && !empty($_POST['tpv_efectivo']) ? $_POST['tpv_efectivo'] : $factura->total;
+                        
+                        $this->imprimir_ticket($factura, floatval($_POST['num_tickets']), TRUE, $is_regalo, $tpv_efectivo, $tpv_cambio);
+                        
                         /// actualizamos la caja
                         $this->caja->dinero_fin += $factura->total;
                         $this->caja->tickets += 1;
@@ -698,7 +698,7 @@ class tpv_recambios extends fbase_controller
         }
 
         if ($fac0) {
-            $this->imprimir_ticket($fac0, 1, FALSE);
+            $this->imprimir_ticket($fac0, 1, FALSE, FALSE);
         } else {
             $this->new_error_msg("Ticket no encontrado.");
         }
@@ -710,7 +710,7 @@ class tpv_recambios extends fbase_controller
      * @param type $num_tickets
      * @param type $cajon
      */
-    private function imprimir_ticket($factura, $num_tickets = 1, $cajon = TRUE)
+    private function imprimir_ticket($factura, $num_tickets = 1, $cajon = TRUE, $is_regalo = FALSE, $tpv_efectivo = NULL, $tpv_cambio = NULL)
     {
         if ($this->terminal) {
             if ($cajon) {
@@ -718,7 +718,7 @@ class tpv_recambios extends fbase_controller
             }
 
             while ($num_tickets > 0) {
-                $this->terminal->imprimir_ticket($factura, $this->empresa, $this->imprimir_descripciones, $this->imprimir_observaciones);
+                $this->terminal->imprimir_ticket($factura, $this->empresa, $this->imprimir_descripciones, $this->imprimir_observaciones, $is_regalo, $tpv_efectivo, $tpv_cambio);
                 $num_tickets--;
             }
 
@@ -726,28 +726,6 @@ class tpv_recambios extends fbase_controller
             $this->new_message('<a href="#" data-toggle="modal" data-target="#modal_ayuda_ticket">¿No se imprime el ticket?</a>');
         } else {
             $this->new_error_msg('Terminal no encontrado.');
-        }
-    }
-
-    /**
-     * Imprime uno o varios tickets de la factura.
-     * @param factura_cliente $factura
-     * @param type $num_tickets
-     * @param type $cajon
-     */
-    private function imprimir_ticket_regalo($factura, $num_tickets = 1, $cajon = TRUE)
-    {
-        if ($this->terminal) {
-            if ($cajon) {
-                $this->terminal->abrir_cajon();
-            }
-
-            while ($num_tickets > 0) {
-                $this->terminal->imprimir_ticket_regalo($factura, $this->empresa, $this->imprimir_descripciones, $this->imprimir_observaciones);
-                $num_tickets--;
-            }
-
-            $this->terminal->save();
         }
     }
 
