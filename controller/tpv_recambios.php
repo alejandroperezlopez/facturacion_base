@@ -610,7 +610,7 @@ class tpv_recambios extends fbase_controller
 
                         $this->new_message("<a href='" . $factura->url() . "'>Factura</a> guardada correctamente.");
                         $is_regalo = $_POST['regalo'] == 'TRUE';
-                        $tpv_cambio = isset($_POST['tpv_cambio']) ? $_POST['tpv_cambio']: '0.0';
+                        $tpv_cambio = isset($_POST['tpv_cambio']) ? $_POST['tpv_cambio']: "0.0";
                         $tpv_efectivo = isset($_POST['tpv_efectivo']) && !empty($_POST['tpv_efectivo']) ? $_POST['tpv_efectivo'] : $factura->total;
                         
                         $this->imprimir_ticket($factura, floatval($_POST['num_tickets']), TRUE, $is_regalo, $tpv_efectivo, $tpv_cambio);

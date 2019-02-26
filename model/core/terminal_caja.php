@@ -443,11 +443,10 @@ class terminal_caja extends \fs_model
             $lineaiguales .= '=';
         }
 
+        $this->add_linea($lineaiguales . "\n");
         if ($is_regalo) {
-            $this->add_linea($lineaiguales);
-            $this->add_linea($this->center_text('TICKET REGALO'));
+            $this->add_linea($this->center_text("TICKET REGALO") . "\n");
         } else {
-            $this->add_linea($lineaiguales . "\n");
             $this->add_linea(
                 'TOTAL A PAGAR: ' . sprintf("%" . ($this->anchopapel - 15) . "s", $this->show_precio($factura->total, $factura->coddivisa)) . "\n"
             );
